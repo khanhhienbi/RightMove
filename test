@@ -1,0 +1,56 @@
+import requests
+from bs4 import BeautifulSoup
+import numpy as np
+import pandas as pd
+from docx import Document
+import csv
+result = requests.get("https://www.rightmove.co.uk/property-for-sale/find.html?locationIdentifier=POSTCODE%5E88430&insId=1&radius=1.0&minPrice=&maxPrice=300000&minBedrooms=&maxBedrooms=&displayPropertyType=&maxDaysSinceAdded=&_includeSSTC=on&sortByPriceDescending=&primaryDisplayPropertyType=&secondaryDisplayPropertyType=&oldDisplayPropertyType=&oldPrimaryDisplayPropertyType=&newHome=&auction=false")
+#print(result.status_code)
+#print(result.headers)
+src = result.content
+#print(src)
+soup = BeautifulSoup(src, 'lxml')
+links = soup.find_all("a")
+#print(links)
+#print("\n")
+from pathlib import Path
+p = Path('/Users/Trang/Desktop/') ## if you want to write to current directory
+with open(p / 'result.txt', 'w') as f:
+    for link in links: 
+        if "refurbishment" in link.text:
+            print(link, file=f)
+            print(link.attrs['href'])
+
+import smtplib, ssl
+
+smtp_server = "smtp.gmail.com"
+port = 535  # For starttls
+sender_email = "khanhhienbi@gmail.com"
+password = input("Type your password and press enter: ")
+
+sender_email = "khanhhienbi@gmail.com"
+receiver_email = "khdinh496@gmail.com"
+password = input("Type your password and press enter:")
+
+message = MIMEMultipart("alternative")
+message["Subject"] = "test"
+message["From"] = sender_email
+message["To"] = receiver_email
+
+
+# Turn these into plain/html MIMEText objects
+part1 = MIMEText(text, "plain")
+part2 = MIMEText(html, "html")
+
+# Add HTML/plain-text parts to MIMEMultipart message
+# The email client will try to render the last part first
+message.attach(part1)
+message.attach(part2)
+
+# Create secure connection with server and send email
+context = ssl.create_default_context()
+with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+    server.login(sender_email, password)
+    server.sendmail(
+        sender_email, receiver_email, message.as_string()
+    )
